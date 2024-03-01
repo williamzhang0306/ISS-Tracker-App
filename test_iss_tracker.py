@@ -8,12 +8,33 @@ def client():
     with app.test_client() as client:
         yield client
 
-def test_load_from_NASA():
+def test_load_epochs_from_NASA():
     '''
     A test case to check if xml data can still be retrieved
     and parsed from NASA
     '''
-    data = load_iss_data_from_url(iss_data_url)
+    data = load_iss_data_from_url(iss_data_url, 'epochs')
+
+def test_load_header_from_NASA():
+    '''
+    A test case to check if xml data can still be retrieved
+    and parsed from NASA
+    '''
+    data = load_iss_data_from_url(iss_data_url, 'header')
+
+def test_load_metadata_from_NASA():
+    '''
+    A test case to check if xml data can still be retrieved
+    and parsed from NASA
+    '''
+    data = load_iss_data_from_url(iss_data_url, 'metadata')
+
+def test_load_comments_from_NASA():
+    '''
+    A test case to check if xml data can still be retrieved
+    and parsed from NASA
+    '''
+    data = load_iss_data_from_url(iss_data_url, 'comments')
 
 def test_search_epochs():
     '''
@@ -64,6 +85,7 @@ def test_speed_at_epoch():
     with pytest.raises(KeyError):
         speed_at_epoch(bad_data)
     
+
 def test_get_epochs(client):
     response = client.get('/epochs?limit=5&offset=0')
     assert response.status_code == 200

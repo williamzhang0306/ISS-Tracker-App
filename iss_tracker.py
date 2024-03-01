@@ -13,12 +13,13 @@ iss_data_url = 'https://nasa-public-data.s3.amazonaws.com/iss-coords/current/ISS
 # initialize flask app
 app = Flask(__name__)
 
-def load_iss_data_from_url(url: str) -> List[dict]:
+def load_iss_data_from_url(url: str, return_type = 'epochs') -> List[dict]:
     '''
     Loads state vector data of the ISS from a given URL.
 
     Arguments:
     - url (str): The URL to fetch ISS data from.
+    - return_type (str): ['header','metadata','epochs','comments']
 
     Returns:
     - List[dict]: A list of state vector data for the ISS.
@@ -29,18 +30,53 @@ def load_iss_data_from_url(url: str) -> List[dict]:
     # Check if the GET request failed
     response.raise_for_status()
 
-    # Parse state vectors data from XML data
-    epochs = []
+    # Load XML data into python dict.
     try:
         xml_binary = response.content
         data = xmltodict.parse(xml_binary)
-        epochs = data['ndm']['oem']['body']['segment']['data']['stateVector']
-    
     except:
-        logging.warning(f'Failed parse XML data.')
+        logging.warning(f'Failed load XML data to dict.')
+        return []
 
-    return epochs
+    # Parse and return specificed data from dict
+    if return_type == 'header':
+        try:
+            header = data['ndm']['oem']['header']
+        except:
+            logging.warning(f'Failed load XML data to dict.')
+            header = []
+        return header
     
+
+    elif return_type == 'metadata':
+        try:
+            metadata =  data['ndm']['oem']['body']['segment']['metadata']
+        except:
+            logging.warning(f'Failed load XML data to dict.')
+            metadata = []
+        return metadata
+    
+
+    elif return_type == 'epochs':
+        try:
+            epochs = data['ndm']['oem']['body']['segment']['data']['stateVector']
+        except:
+            logging.warning(f'Failed load XML data to dict.')
+            epochs = []
+        return epochs
+    
+
+    elif return_type == 'comments':
+        try:
+            comments = data['ndm']['oem']['body']['segment']['data']['COMMENT']
+        except:
+            logging.warning(f'Failed load XML data to dict.')
+            comments = []
+        return comments
+    
+    else:
+        raise ValueError(f"Invalid return type {return_type}. Choose ['header','metadata','epochs','comments'].")
+
 def search_epochs(
     provided_epoch_str:str,
     list_state_vectors: List[dict],
@@ -185,6 +221,24 @@ def get_single_epoch_speed(epoch):
     
     # Get speed at closest epoch
     return str(speed_at_epoch(closest_epoch))
+
+@app.route('/epochs/<epoch>/location', methods = ['GET'])
+def get_single_epoch_location(epoch):
+    # retrieve data from NASA
+    try:
+        data = load_iss_data_from_url(iss_data_url)
+    except requests.HTTPError as e:
+        return f'Failed to retreieve ISS data from NASA. Status Code: {e.response.status_code}'
+    
+    # get the closest epoch
+    try:
+        closest_epoch = search_epochs(epoch, data)
+    except:
+        return f'Failed to find {epoch} in data range.'
+    
+    # Get speed at closest epoch
+    return str(speed_at_epoch(closest_epoch))
+
 
 @app.route('/now', methods = ['GET'])
 def get_current_epoch():
