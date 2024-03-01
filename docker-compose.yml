@@ -1,0 +1,12 @@
+---
+version: "3"
+
+services:
+    iss-tracker:
+        build:
+            context: ./
+            dockerfile: ./dockerfile
+        image: williamzhang/flask-iss-tracker:1.0
+        container_name: iss-tracker-service
+        ports:
+            - "5000:5000"
