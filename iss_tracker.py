@@ -150,6 +150,28 @@ def speed_at_epoch(data_point:dict):
     return math.sqrt(x_dot**2 + y_dot**2 + z_dot**2)
 
 ### Flask Routes:
+@app.route('/metadata', methods = ['GET'])
+def get_metadata():
+    try:
+        return load_iss_data_from_url(iss_data_url, 'metadata')
+    except requests.HTTPError as e:
+        return f'Failed to retreieve ISS data from NASA. Status Code: {e.response.status_code}'
+
+@app.route('/header', methods = ['GET'])
+def get_header():
+    try:
+        return load_iss_data_from_url(iss_data_url, 'header')
+    except requests.HTTPError as e:
+        return f'Failed to retreieve ISS data from NASA. Status Code: {e.response.status_code}'
+
+@app.route('/comment', methods = ['GET'])
+def get_comments():
+        # retrieve data from NASA
+    try:
+        return load_iss_data_from_url(iss_data_url, 'comments')
+    except requests.HTTPError as e:
+        return f'Failed to retreieve ISS data from NASA. Status Code: {e.response.status_code}'
+    
 @app.route('/epochs', methods = ['GET'])
 def get_epochs():
     '''
@@ -239,7 +261,6 @@ def get_single_epoch_location(epoch):
     # Get speed at closest epoch
     return str(speed_at_epoch(closest_epoch))
 
-
 @app.route('/now', methods = ['GET'])
 def get_current_epoch():
     # retrieve data from NASA
@@ -269,4 +290,4 @@ def get_current_epoch():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host = '0.0.0.0')
+    app.run(debug=True, host = '0.0.0.0', port = 5001)
