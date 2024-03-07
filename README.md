@@ -38,7 +38,7 @@ Prerequiste: An enviornment with Docker installed.
 
 ## With Docker Commands
 
-### Docker Build
+### Building the Image
 
 To build the iss_tracker Docker image run the `docker build` command from the `homework04` directory:
 
@@ -47,20 +47,33 @@ docker build -t williamzhang/flask-iss-tracker:1.0 .
 ```
 This will build a Docker image tagged `williamzhang/flask-iss-tracker:1.0` using the Dockerfile in the this directory.
 
-### Docker Run
+### Running the Service
 
 After building the image, you can run the `iss_tracker.py` script as a docker container,
 ```bash 
-docker run --name "flask-iss-app" -d -p 5000:5000 williamzhang/flask-iss-tracker:1.0
+docker run --name "iss-tracker-service" -d -p 5000:5000 williamzhang/flask-iss-tracker:1.0
 ```
 Here's a summary of the options for `docker run`:
-+ `--name "flask-iss-app"`: Sets a custom name ("flask-iss-app") for the container.
++ `--name "iss-tracker-service"`: Sets a custom name ("iss-tracker-service") for the container.
 
 + `-d`: Runs the container in the background (detached mode).
 
 + `-p 5000:5000`: Publishes the container's port 5000 to the host machine's port 5000.
 
 + `williamzhang/flask-iss-tracker:1.0`: Specifies the Docker image to use for creating the container. In this case, it uses the image named "williamzhang/flask-iss-tracker" with the tag "1.0".
+
+### Running Unit Tests
+
+After building the image, you can run the unit tests in `test_iss_tracker.py` with `pytest`
+```bash 
+docker run --name "pytest-iss-tracker" williamzhang/flask-iss-tracker:1.0 -m pytest
+```
+Here's a summary of the options for `docker run`:
++ `--name "pytest-iss-tracker"`: Sets a custom name ("pytest-iss-tracker") for the container.
+
++ `williamzhang/flask-iss-tracker:1.0`: Specifies the Docker image to use for creating the container. In this case, it uses the image named "williamzhang/flask-iss-tracker" with the tag "1.0".
+
++ `-m pytest`: The command to run in the container. This tells python to run the `pytest` module.
 
 ## With Docker Compose
 Alternatively, you can use the docker compose file which has already configured the service.
@@ -70,9 +83,14 @@ To build the flask-iss-tracker image run:
 docker compose build
 ```
 
-Then to launch the service in the background run.
+To launch the service in the background run.
 ```bash
-docker compose up -d
+docker compose up -d iss-tracker
+```
+
+To perform unit tests run
+```bash
+docker compose up pytest-iss-tracker
 ```
 
 ## Accessing Routes
