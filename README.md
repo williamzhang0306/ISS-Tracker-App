@@ -64,14 +64,20 @@ Here's a summary of the options for `docker run`:
 
 ## With Docker Compose
 Alternatively, you can use the docker compose file which has already configured the service.
+
+To build the flask-iss-tracker image run:
 ```bash 
-[1] docker compose build
-[2] docker compose up -d
+docker compose build
+```
+
+Then to launch the service in the background run.
+```bash
+docker compose up -d
 ```
 
 ## Accessing Routes
 
-The app has multiple different routes for accessing ISS trajectory data.
+While the service is running it provides multiple different routes for accessing ISS trajectory data.
 
 ### `/comment`:
 
@@ -79,7 +85,10 @@ This route will retrieve the 'comment' list data.
 
 Example:
 ```shell
-$ curl "localhost:5000/comment"
+curl "localhost:5000/comment"
+```
+Output:
+```shell
 [
   "Units are in kg and m^2",
   "MASS=459325.00",
