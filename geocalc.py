@@ -26,6 +26,9 @@ def get_lat_long(x:float, y:float, z:float, timestamp:str, time_format:str = ISO
         - lat (float): latitude in decimal format.
         - long (float): longitude in decimal format.
         - height (str): string representation of height in km.
+
+    Credit:
+    https://stackoverflow.com/questions/78097446/how-do-i-use-astropy-to-transform-coordinates-from-j2000-to-lat-lon-and-altitu
     """
     dtime =  datetime.strptime(timestamp, time_format).replace(tzinfo=timezone.utc)
     now = Time(dtime)
