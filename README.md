@@ -77,7 +77,16 @@ docker compose up -d
 
 ## Accessing Routes
 
-While the service is running it provides multiple different routes for accessing ISS trajectory data.
+While the service is running it provides multiple Flask routes for accessing ISS trajectory data.
+
+- [`/comment`](#`/comment`)
+- [`/header`](#`/headert`)
+- [`/metadata`](#`/metadata`)
+- [`/epochs?limit=int&offset=int`](#`/epochs?limit=int&offset=int`)
+- [`/epochs/<epoch>`](#`/epochs/<epoch>`)
+- [`/epochs/<epoch>/speed`](#`/epochs/<epoch>/speed`)
+- [`/epochs/<epoch>/location`](#/epochs/<epoch>/location``)
+- [`/now`](#`/now`)
 
 ### `/comment`:
 
@@ -127,12 +136,257 @@ Output:
 ```
 
 ### `/header`
+
+This route will retrieve the ISS trajectory dataset header.
+
+Example:
+```shell
+curl "localhost:5000/header"
+```
+Output:
+```shell
+{
+  "CREATION_DATE": "2024-064T19:05:34.727Z",
+  "ORIGINATOR": "JSC"
+}
+```
+
+
 ### `/metadata`
+
+This route will retrieve the ISS trajectory dataset metadata.
+
+Example:
+```shell
+curl "localhost:5000/header"
+```
+Output:
+```shell
+{
+  "CENTER_NAME": "EARTH",
+  "OBJECT_ID": "1998-067-A",
+  "OBJECT_NAME": "ISS",
+  "REF_FRAME": "EME2000",
+  "START_TIME": "2024-064T12:00:00.000Z",
+  "STOP_TIME": "2024-079T12:00:00.000Z",
+  "TIME_SYSTEM": "UTC"
+}
+```
+
 ### `/epochs?limit=int&offset=int`
+This route will provide the avaible epochs data within the optional query paramters:
+- `limit`: the maxmium number of epochs to return
+- `offset`: the number of epochs to skip from the start of avaible data.
+
+Without passing any paramters, this route wiil return the entirety of the avaible data.
+
+Example:
+```shell
+curl localhost:5000/epochs
+```
+Output:
+```shell
+[
+ {
+    "EPOCH": "2024-067T11:54:00.000Z",
+    "X": {
+      "#text": "-4163.3534725972404",
+      "@units": "km"
+    },
+    "X_DOT": {
+      "#text": "-1.1474439071968301",
+      "@units": "km/s"
+    },
+    "Y": {
+      "#text": "2583.6625281637798",
+      "@units": "km"
+    },
+    "Y_DOT": {
+      "#text": "-7.0238470668305402",
+      "@units": "km/s"
+    },
+    "Z": {
+      "#text": "4699.48974739803",
+      "@units": "km"
+    },
+    "Z_DOT": {
+      "#text": "2.8444416176628402",
+      "@units": "km/s"
+    }
+  },
+  
+  ...
+
+  {
+    "EPOCH": "2024-067T11:58:00.000Z",
+    "X": {
+      "#text": "-4283.9472609613204",
+      "@units": "km"
+    },
+    "X_DOT": {
+      "#text": "0.14844509525019001",
+      "@units": "km/s"
+    },
+    "Y": {
+      "#text": "824.44392134937004",
+      "@units": "km"
+    },
+    "Y_DOT": {
+      "#text": "-7.5467160106393596",
+      "@units": "km/s"
+    },
+    "Z": {
+      "#text": "5202.40213205689",
+      "@units": "km"
+    },
+    "Z_DOT": {
+      "#text": "1.3210479505166799",
+      "@units": "km/s"
+    }
+  }
+]
+```
+
+With `limit` = 1 and `offset` = 10. This should return just the 10th availble epoch and nothing more.
+
+Example:
+```shell
+curl localhost:5000/epochs?limit=1&offset=10
+```
+Output:
+```shell
+[
+  {
+    "EPOCH": "2024-052T12:00:00.000Z",
+    "X": {
+      "#text": "4721.5105798739096",
+      "@units": "km"
+    },
+    "X_DOT": {
+      "#text": "-5.4614207249789404",
+      "@units": "km/s"
+    },
+    "Y": {
+      "#text": "2692.6387190393002",
+      "@units": "km"
+    },
+    "Y_DOT": {
+      "#text": "3.72333576790653",
+      "@units": "km/s"
+    },
+    "Z": {
+      "#text": "-4082.3502740408699",
+      "@units": "km"
+    },
+    "Z_DOT": {
+      "#text": "-3.8618306484028202",
+      "@units": "km/s"
+    }
+  }
+]
+```
+
+
 ### `/epochs/<epoch>`
+
+You can serach for the data associated with an individual epoch. Note that the app expects the epoch to be provided in ISO8601 format. In other words provide a UTC time stamp in this format `{Year}-{Day of the year}T{HH:MM:SS.MS}Z`. For example "2024-052T11:35:00.01Z".
+
+Example:
+```shell
+curl localhost:5000/epochs/2024-63T11:35:00.01Z
+```
+Output:
+```shell
+{
+  "EPOCH": "2024-064T12:00:00.000Z",
+  "X": {
+    "#text": "4353.7916429999996",
+    "@units": "km"
+  },
+  "X_DOT": {
+    "#text": "-2.0891359660000002",
+    "@units": "km/s"
+  },
+  "Y": {
+    "#text": "318.43206900000001",
+    "@units": "km"
+  },
+  "Y_DOT": {
+    "#text": "7.2463633099999996",
+    "@units": "km/s"
+  },
+  "Z": {
+    "#text": "-5212.534463",
+    "@units": "km"
+  },
+  "Z_DOT": {
+    "#text": "-1.2973529509999999",
+    "@units": "km/s"
+  }
+}
+```
+
 ### `/epochs/<epoch>/speed`
+
+If you are just interested in the speed at a certain epoch, adding `/speed` will return the magnitude of the velocity vector in km/s.
+
+Example:
+```shell
+curl localhost:5000/epochs/2024-63T11:35:00.01Z/speed
+```
+Output:
+```shell
+7.65228037805838
+```
+
 ### `/epochs/<epoch>/location`
+
+Similarly, adding `/location` instead will return the latitude, longitude, altitude and geolocation at the epoch.
+
+Example:
+```shell
+curl localhost:5000/epochs/2024-67T14:50:00.01Z/location
+```
+Output:
+```shell
+{
+  "Altitude": "415.8499382971738 km",
+  "Geolocation": "Kishoreganj, Kishoreganj Sadar, Kishoreganj District, Dhaka Division, Bangladesh",
+  "Latitude": 24.357,
+  "Longitude": 90.8335
+}
+
+```
+
 ### `/now`
+
+This route will search for the epoch closest to when the request is sent and return the Altitude, Geolocation, Latitude, Longitude, ISO time stamp, speed, position and velocity.
+
+Example:
+```shell
+curl localhost:5000/now
+```
+Output:
+```shell
+{
+  "Altitude": "424.2398040187759 km",
+  "Geolocation": "No location found.",
+  "Latitude": 38.2895,
+  "Longitude": -131.181,
+  "epoch": "2024-067T13:44:00.000Z",
+  "position": [
+    -2640.37989455653,
+    -4642.18843325062,
+    4199.96698288328
+  ],
+  "speed": 7.6597976929977465,
+  "velocity": [
+    3.79549286476059,
+    -5.52509302275157,
+    -3.70676161914237
+  ]
+}
+```
 
 
 ## Citations
