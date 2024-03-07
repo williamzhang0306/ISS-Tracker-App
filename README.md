@@ -79,14 +79,14 @@ docker compose up -d
 
 While the service is running it provides multiple Flask routes for accessing ISS trajectory data.
 
-- [`/comment`](#`/comment`)
-- [`/header`](#`/headert`)
-- [`/metadata`](#`/metadata`)
-- [`/epochs?limit=int&offset=int`](#/epochs?limit=int&offset=int)
-- [`/epochs/<epoch>`](#/epochs/<epoch>)
-- [`/epochs/<epoch>/speed`](#`/epochs/<epoch>/speed`)
-- [`/epochs/<epoch>/location`](#/epochs/<epoch>/location``)
-- [`/now`](#`/now`)
+- [`/comment`](#comment)
+- [`/header`](#/header)
+- [`/metadata`](#metadata)
+- [`/epochs?limit=int&offset=int`](#epochslimitintoffsetint)
+- [`/epochs/<epoch>`](#epochsepoch)
+- [`/epochs/<epoch>/speed`](#epochsepochspeed)
+- [`/epochs/<epoch>/location`](#epochsepochlocation)
+- [`/now`](#now)
 
 ### `/comment`:
 
