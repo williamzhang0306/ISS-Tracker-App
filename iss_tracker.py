@@ -6,6 +6,7 @@ import logging
 from typing import List
 from datetime import datetime, timezone, timedelta
 import math
+import geocalc
 
 # Current URL to access ISS data
 iss_data_url = 'https://nasa-public-data.s3.amazonaws.com/iss-coords/current/ISS_OEM/ISS.OEM_J2K_EPH.xml'
@@ -81,8 +82,8 @@ def search_epochs(
     provided_epoch_str:str,
     list_state_vectors: List[dict],
     epoch_key:str = 'EPOCH', 
-    provided_epoch_format:str = "%Y-%jT%H:%M:%S.%fZ",
-    data_epoch_format:str = "%Y-%jT%H:%M:%S.%fZ"
+    provided_epoch_format:str = geocalc.ISO8601,
+    data_epoch_format:str = geocalc.ISO8601
 ) -> dict:
     """
     Finds the state vector with the nearest epoch timestamp in the given list.
@@ -148,6 +149,28 @@ def speed_at_epoch(data_point:dict):
     z_dot = float(data_point['Z_DOT']['#text'])
 
     return math.sqrt(x_dot**2 + y_dot**2 + z_dot**2)
+
+def geoloc_at_epoch(data_point:dict):
+    """
+    Performs calculations for latitude, longitude, altitude, geolocation
+    for a given epoch.
+
+    Paramters:
+    - data_point(dict): data for a single epoch. NOTE Keys are hardcoded.
+
+    Returns:
+    - tuple: lat (float), long (float), height_str (string), location_str (string)
+    """
+
+    x = float(data_point['X']['#text'])
+    y = float(data_point['Y']['#text'])
+    z = float(data_point['Z']['#text'])
+    timestamp = data_point['EPOCH']
+
+    lat, long, height_str = geocalc.get_lat_long(x,y,z,timestamp)
+    location_str = geocalc.get_geoposition(lat,long)
+
+    return lat,long,height_str,location_str
 
 ### Flask Routes:
 @app.route('/metadata', methods = ['GET'])
@@ -259,7 +282,14 @@ def get_single_epoch_location(epoch):
         return f'Failed to find {epoch} in data range.'
     
     # Get speed at closest epoch
-    return str(speed_at_epoch(closest_epoch))
+    lat, long, altidude, location_str = geoloc_at_epoch(closest_epoch)
+
+    return {
+        "Latitude": lat, 
+        "Longitude": long, 
+        "Altitude": altidude, 
+        "Geolocation": location_str
+    }
 
 @app.route('/now', methods = ['GET'])
 def get_current_epoch():
@@ -279,11 +309,17 @@ def get_current_epoch():
     position_vector = [float( closest_epoch[position_key]["#text"]) for position_key in ["X", "Y", "Z"]]
     velocity_vector =  [float( closest_epoch[velocity_key]["#text"]) for velocity_key in ["X_DOT", "Y_DOT", "Z_DOT"]]
     speed = speed_at_epoch(closest_epoch)
+    lat, long, altidude, location_str = geoloc_at_epoch(closest_epoch)
 
     packet = {
+        "epoch": closest_epoch["EPOCH"],
         "position": position_vector,
         "velocity": velocity_vector,
-        "speed": speed
+        "speed": speed,
+        "Latitude": lat, 
+        "Longitude": long, 
+        "Altitude": altidude, 
+        "Geolocation": location_str
     }
 
     return packet
