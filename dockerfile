@@ -7,7 +7,7 @@ RUN pip install -r /app/requirements.txt
 
 COPY iss_tracker.py /app/iss_tracker.py
 COPY geocalc.py /app/geocalc.py
-COPY test_iss_tracker.py /app/test_iss_tracker.py
+COPY test/test_iss_tracker.py /app/test/test_iss_tracker.py
 
 ENTRYPOINT ["python"]
 CMD ["iss_tracker.py"]
