@@ -10,8 +10,9 @@ This repository contains the code and instructions to build, run and test a cont
 
 # Software Diagram
 
+![diagram](diagram.png)
 
-The Jestream VM can be accessed via a two hop SSH connection. First into the student-login node at TACC, then into a virtual machine. Within the VM, a client can send requests to the containerized ISS Tracker app. The python script running within the container uses the Flask API to manage the requests. Additionally the python script uses the requests library to pull the NASA data set and performs processing/filtering before sending the data to the client.
+The Jestream VM can be accessed via a two hop SSH connection. First into the student-login node at TACC, then into a virtual machine. Within the VM, a client can send requests to the containerized ISS Tracker app. The python script running within the container uses the Flask API to manage the requests. Additionally the python script uses the requests library to pull the NASA data set in XML format and a GeoPy client to query the Nominatim geocoding service (converting coordinates to addresses).
 
 # Directory Summary
 
