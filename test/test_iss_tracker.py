@@ -1,4 +1,8 @@
 import pytest
+import sys
+
+sys.path.append('.') # unit tests are intended to be collected from the parent directory - which is the same level as iss_tracker.py
+
 from iss_tracker import *
 
 # NOTE: Unit tests for Flask routes were generated with the aid of ChatGPT
